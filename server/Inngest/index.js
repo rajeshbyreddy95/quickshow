@@ -110,7 +110,8 @@ const sendbookingEmail = inngest.createFunction(
             }
         }).populate('user')
 
-        await sendEmail({
+        try {
+            await sendEmail({
             to: booking.user.email,
             subject: `Payment confirmation : '${booking.show.movie.originalTitle}' booked!`,
             body: `<div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -126,6 +127,8 @@ const sendbookingEmail = inngest.createFunction(
                 <strong>Date:</strong> ${new Date(booking.show.showDateTime).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}<br>
                 <strong>Time:</strong> ${new Date(booking.show.showDateTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })}
                 </p>
+                <p><strong>Booking ID:</strong style="color: #F84565;"> ${booking._id}</p>
+                 <p><strong>Seats:</strong> ${booking.bookedseats?.join(', ') || 'N/A'}</p>
 
                 <p>🎬 Enjoy the show and don’t forget to grab your popcorn!</p>
             </div>
@@ -134,9 +137,13 @@ const sendbookingEmail = inngest.createFunction(
                 <p style="margin: 0;">Thanks for booking with us!<br>— The QuickShow Team</p>
                 <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow.com" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
             </div>
+            <img src="https://chart.googleapis.com/chart?cht=qr&chl=${booking._id}&chs=180x180&choe=UTF-8&chld=L|2" alt="QR Code" />
             </div>`
         })
+        } catch (error) {
+             console.error("Email sending failed:", error);
+        }
     }
 )
 
-export const functions = [userCreated, userUpdated, userDeleted, releaseSeatsandDeletebooking, deleteBookingAfterShow,sendbookingEmail];
+export const functions = [userCreated, userUpdated, userDeleted, releaseSeatsandDeletebooking, deleteBookingAfterShow, sendbookingEmail];
