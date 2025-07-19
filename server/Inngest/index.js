@@ -46,7 +46,7 @@ export const inngest = new Inngest({ id: "movie-ticket-booking" });
     {id : 'relese-seats-delete-booking'},
     {event : 'app/checkpayment'},
     async ({event,step}) => {
-        const tenminutes = new Date(Date.now() + 1 * 60 * 1000);
+        const tenminutes = new Date(Date.now() + 10 * 60 * 1000);
         await step.sleepUntil('Wait-for-10-minutes', tenminutes);
         await step.run('check-payment-status', async() => {
             const bookingId = event.data.bookingId;
