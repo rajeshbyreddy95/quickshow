@@ -1,3 +1,4 @@
+import { inngest } from "../Inngest/index.js";
 import Booking from "../models/Booking.js";
 import Show from "../models/Show.js";
 import { Stripe } from 'stripe';
@@ -75,13 +76,19 @@ export const createBooking = async (req, res) => {
         booking.paymentLink = session.url;
         await booking.save();
 
+        await inngest.send({
+            name : "app/checkpayment",
+            data : {
+                bookingId : booking._id.toString(),
+            }
+        })
+
         res.json({ success: true, url : session.url});
     } catch (error) {
     console.error("Stripe session error:", error);
     res.json({ success: false, message: error.message });
 }
 }
-
 
 export const getoccupiedSeats = async (req, res) => {
     try {
