@@ -15,14 +15,12 @@ const app = express();
 const port = 3000;
 await mongoConnect();
 
+app.post('/api/stripe', express.raw({type : "application/json"}), stripeWebhooks);
 
 //Middleware 
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware())
-
-app.post('/api/stripe', express.raw({type : "application/json"}), stripeWebhooks);
-
 
 //Routes
 app.get('/', (req,res) => {res.send('Server is live!')});
