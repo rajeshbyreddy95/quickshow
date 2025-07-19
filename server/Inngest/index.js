@@ -64,24 +64,27 @@ export const inngest = new Inngest({ id: "movie-ticket-booking" });
     }
    )
 
-  const cleanUpOldPaidBookings = inngest.createFunction(
-  { id: "cleanup-paid-bookings-after-show" },
-  { cron: "0 * * * *" },
-  async ({ step }) => {
+export const deleteBookingAfterShow = inngest.createFunction(
+  { id: "delete-booking-after-show" },
+  { event: "app/delete-booking-after-show" },
+  async ({ event }) => {
+    const bookingId = event.data.bookingId;
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return;
+
+    const show = await Show.findById(booking.show);
+    if (!show) return;
+
     const now = new Date();
 
-    await step.run("delete-paid-bookings-after-show", async () => {
-     const bookings = await Booking.find({}).populate('show');
-
-      for (const booking of bookings) {
-        if (!booking.show) continue;
-
-        if (new Date(booking.show.showDateTime) < now) {
-          await Booking.findByIdAndDelete(booking._id);
-        }
-      }
-    });
+    if (booking.isPaid && new Date(show.showDateTime) < now) {
+      await Booking.findByIdAndDelete(bookingId);
+    } else {
+      console.log("Booking unpaid or show not over yet.");
+    }
   }
 );
 
-export const functions = [userCreated,userUpdated,userDeleted,releaseSeatsandDeletebooking,cleanUpOldPaidBookings];
+
+export const functions = [userCreated,userUpdated,userDeleted,releaseSeatsandDeletebooking,deleteBookingAfterShow];

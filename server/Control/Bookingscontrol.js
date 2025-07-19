@@ -11,7 +11,7 @@ export const checkavailabilty = async (showId, selectedSeats) => {
             return false;
         }
         const occupiedSeats = show.occupiedSeats;
-        const isSeatTaken = selectedSeats.some((seat) => { occupiedSeats[seat]});
+        const isSeatTaken = selectedSeats.some((seat) => { occupiedSeats[seat] });
 
         return !isSeatTaken;
     } catch (error) {
@@ -62,32 +62,40 @@ export const createBooking = async (req, res) => {
                 },
                 quantity: 1,
             }
-        ] 
+        ]
 
         const session = await stripeInstance.checkout.sessions.create({
             success_url: `${origin}/loading/my-bookings`,
-            cancel_url : `${origin}/my-bookings`,
-            line_items : line_items,
+            cancel_url: `${origin}/my-bookings`,
+            line_items: line_items,
             mode: 'payment',
-            metadata : {
-                bookingId : booking._id.toString(),            
+            metadata: {
+                bookingId: booking._id.toString(),
             },
         })
         booking.paymentLink = session.url;
         await booking.save();
 
         await inngest.send({
-            name : "app/checkpayment",
-            data : {
-                bookingId : booking._id.toString(),
+            name: "app/checkpayment",
+            data: {
+                bookingId: booking._id.toString(),
             }
         })
 
-        res.json({ success: true, url : session.url});
+        await inngest.send({
+            name: "app/delete-booking-after-show",
+            data: {
+                bookingId: booking._id.toString()
+            },
+            timestamp: new Date(show.showDateTime.getTime() + 5 * 60 * 1000)
+        });
+
+        res.json({ success: true, url: session.url });
     } catch (error) {
-    console.error("Stripe session error:", error);
-    res.json({ success: false, message: error.message });
-}
+        console.error("Stripe session error:", error);
+        res.json({ success: false, message: error.message });
+    }
 }
 
 export const getoccupiedSeats = async (req, res) => {
