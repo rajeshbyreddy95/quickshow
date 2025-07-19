@@ -67,35 +67,52 @@ const releaseSeatsandDeletebooking = inngest.createFunction(
 )
 
 export const deleteBookingAfterShow = inngest.createFunction(
-    { id: "delete-booking-after-show" },
-    { event: "app/delete-booking-after-show" },
-    async ({ event, step }) => {
-        const bookingId = event.data.bookingId;
-        const booking = await Booking.findById(bookingId);
-
-        if (!booking) return;
-        const show = await Show.findById(booking.show);
-        if (!show) return;
-        const showtime = new Date(show.showDateTime.getTime() + 15 * 60 * 1000);
-        await step.sleepUntil('Wait-for-5-minutes', showtime);
-
-        await step.run('check-booking', async () => {
-            const updatebooking = await Booking.findById(bookingId);
-            if (updatebooking.isPaid && showtime.getTime() < Date.now()) {
-                await Booking.findByIdAndDelete(booking._id);
-
-                const otherBookings = await Booking.find({ show: show._id });
-                if (otherBookings.length === 0) {
-                    await Show.findByIdAndDelete(show._id);
-                } else {
-                    console.log("Show not deleted, other bookings still exist.");
-                }
-            } else {
-                console.log("Booking unpaid or show not over yet.");
-            }
-        })
+  { id: "delete-booking-after-show" },
+  { event: "app/delete-booking-after-show" },
+  async ({ event, step }) => {
+    const bookingId = event.data.bookingId;
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      console.warn(`Booking with ID ${bookingId} not found initially.`);
+      return;
     }
+
+    const show = await Show.findById(booking.show);
+    if (!show) {
+      console.warn(`Show with ID ${booking.show} not found.`);
+      return;
+    }
+
+    const showtimeWithBuffer = new Date(show.showDateTime.getTime() + 15 * 60 * 1000);
+
+    await step.sleepUntil('Wait-for-15-minutes-after-show', showtimeWithBuffer);
+
+    await step.run('check-and-delete-booking-and-show', async () => {
+      const updatedBooking = await Booking.findById(bookingId);
+
+      if (!updatedBooking) {
+        console.warn(`Booking with ID ${bookingId} already deleted.`);
+        return;
+      }
+
+      if (updatedBooking.isPaid && Date.now() >= showtimeWithBuffer.getTime()) {
+        await Booking.findByIdAndDelete(updatedBooking._id);
+
+        const remainingBookings = await Booking.find({ show: show._id });
+
+        if (remainingBookings.length === 0) {
+          await Show.findByIdAndDelete(show._id);
+          console.log(`Show ${show._id} deleted because no bookings left.`);
+        } else {
+          console.log("Show not deleted; other bookings still exist.");
+        }
+      } else {
+        console.log("Booking is unpaid or showtime hasn't passed yet.");
+      }
+    });
+  }
 );
+
 
 const sendbookingEmail = inngest.createFunction(
     { id: "send-booking-confirmation-mail" },
