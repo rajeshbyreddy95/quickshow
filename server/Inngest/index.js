@@ -64,4 +64,24 @@ export const inngest = new Inngest({ id: "movie-ticket-booking" });
     }
    )
 
-export const functions = [userCreated,userUpdated,userDeleted,releaseSeatsandDeletebooking];
+  const cleanUpOldPaidBookings = inngest.createFunction(
+  { id: "cleanup-paid-bookings-after-show" },
+  { cron: "0 * * * *" },
+  async ({ step }) => {
+    const now = new Date();
+
+    await step.run("delete-paid-bookings-after-show", async () => {
+     const bookings = await Booking.find({}).populate('show');
+
+      for (const booking of bookings) {
+        if (!booking.show) continue;
+
+        if (new Date(booking.show.showDateTime) < now) {
+          await Booking.findByIdAndDelete(booking._id);
+        }
+      }
+    });
+  }
+);
+
+export const functions = [userCreated,userUpdated,userDeleted,releaseSeatsandDeletebooking,cleanUpOldPaidBookings];
