@@ -10,7 +10,7 @@ export const checkavailabilty = async (showId, selectedSeats) => {
             return false;
         }
         const occupiedSeats = show.occupiedSeats;
-        const isSeatTaken = selectedSeats.some((seat) => { occupiedSeats[seat] === true });
+        const isSeatTaken = selectedSeats.some((seat) => { occupiedSeats[seat]});
 
         return !isSeatTaken;
     } catch (error) {

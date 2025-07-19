@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
-import { dummyBookingData } from '../assets/assets';
-import Loading from '../components/Loading';
 import BlurCircle from '../components/BlurCircle';
 import { StarIcon } from 'lucide-react';
 import time from '../lib/Time';
 import formatDateTime from '../lib/DateCalculate';
 import { useAppContext } from '../context/Appcontext';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 const MyBooking = () => {
   const {axios,getToken,user} = useAppContext();
   const currency = import.meta.env.VITE_CURRENCY;
   const [bookings, setBookings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const getBooking = async () => {
     try {
@@ -22,7 +20,6 @@ const MyBooking = () => {
             }})
           if(data.success) {
             setBookings(data.bookings);
-            setIsLoading(false);
           } else {
             toast.error(data.message);
           }
@@ -73,7 +70,7 @@ const MyBooking = () => {
               <p className="font-semibold text-2xl">
                 {currency} {data.amount}
               </p>
-              {!data.isPaid && <button className='px-4 py-1.5 mb-2 text-sm bg-primary hover:bg-primary-dull rounded-full transition font-medium cursor-pointer'>Pay Now</button>}
+              {!data.isPaid && <Link to={data.paymentLink} className='px-4 py-1.5 mb-2 text-sm bg-primary hover:bg-primary-dull rounded-full transition font-medium cursor-pointer'>Pay Now</Link>}
               </div>
               <p>Total Tickets: <span className="font-semibold">{data.bookedseats.length}</span></p>
               <p>
