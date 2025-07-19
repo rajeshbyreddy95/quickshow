@@ -16,9 +16,10 @@ const sendEmail = async ({ to, subject, body }) => {
         subject,
         html: body,
     })
-    console.log("Sending email to:", booking.user.email);
-    console.log("Subject:", subject);
-    console.log("Body preview:", body.slice(0, 100));
+    console.log(info.from)
+    console.log(info.to)
+    console.log(info.subject)
+    console.log(info.html)
     return info;
 }
 
