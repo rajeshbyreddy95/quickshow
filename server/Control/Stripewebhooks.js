@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
 
 export const stripeWebhooks = async (request, response) => {
@@ -28,7 +29,12 @@ export const stripeWebhooks = async (request, response) => {
                 const { bookingId } = session.metadata;
                 console.log("🆔 Booking ID:", bookingId);
                 console.log("🧪 Type of bookingId:", typeof bookingId);
-                const updatedBooking = await Booking.findByIdAndUpdate(bookingId, {
+                const { ObjectId } = mongoose.Types;
+                if (!ObjectId.isValid(bookingId)) {
+                    console.log("❌ Invalid booking ID:", bookingId);
+                    return response.status(400).send("Invalid booking ID");
+                }
+                const updatedBooking = await Booking.findByIdAndUpdate(new ObjectId(bookingId), {
                     isPaid: true,
                     paymentLink: '',
                 }, { new: true })
