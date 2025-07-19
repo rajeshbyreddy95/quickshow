@@ -76,7 +76,7 @@ export const deleteBookingAfterShow = inngest.createFunction(
         if (!booking) return;
         const show = await Show.findById(booking.show);
         if (!show) return;
-        const showtime = new Date(show.showDateTime.getTime() + 5 * 60 * 1000);
+        const showtime = new Date(show.showDateTime.getTime() + 15 * 60 * 1000);
         await step.sleepUntil('Wait-for-5-minutes', showtime);
 
         await step.run('check-booking', async () => {
