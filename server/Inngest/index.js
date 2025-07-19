@@ -115,52 +115,74 @@ export const deleteBookingAfterShow = inngest.createFunction(
 
 
 const sendbookingEmail = inngest.createFunction(
-    { id: "send-booking-confirmation-mail" },
-    { event: 'app/show.booked' },
-    async ({ event }) => {
-        const { bookingId } = event.data;
-        const booking = await Booking.findById(bookingId).populate({
-            path: 'show',
-            populate: {
-                path: 'movie',
-                model: 'Movie'
-            }
-        }).populate('user')
+  { id: "send-booking-confirmation-mail" },
+  { event: 'app/show.booked' },
+  async ({ event }) => {
+    const { bookingId } = event.data;
 
-        try {
-            await sendEmail({
-            to: booking.user.email,
-            subject: `Payment confirmation : '${booking.show.movie.originalTitle}' booked!`,
-            body: `<div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
-                <h1 style="margin: 0;">🎟️ QuickShow Booking Confirmed!</h1>
-            </div>
-
-            <div style="padding: 24px; font-size: 16px; color: #333;">
-                <h2 style="margin-top: 0;">Hi ${booking.user.name},</h2>
-                <p>Your booking for <strong style="color: #F84565;">"${booking.show.movie.originalTitle}"</strong> is confirmed.</p>
-
-                <p>
-                <strong>Date:</strong> ${new Date(booking.show.showDateTime).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}<br>
-                <strong>Time:</strong> ${new Date(booking.show.showDateTime).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })}
-                </p>
-                <p><strong>Booking ID:</strong style="color: #F84565;"> ${booking._id}</p>
-                 <p><strong>Seats:</strong> ${booking.bookedseats?.join(', ') || 'N/A'}</p>
-
-                <p>🎬 Enjoy the show and don’t forget to grab your popcorn!</p>
-            </div>
-
-            <div style="background-color: #f5f5f5; color: #777; padding: 16px; text-align: center; font-size: 14px;">
-                <p style="margin: 0;">Thanks for booking with us!<br>— The QuickShow Team</p>
-                <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow.com" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
-            </div>
-            <img src="https://chart.googleapis.com/chart?cht=qr&chl=${booking._id}&chs=180x180&choe=UTF-8&chld=L|2" alt="QR Code" />
-            </div>`
-        })
-        } catch (error) {
-             console.error("Email sending failed:", error);
+    try {
+      const booking = await Booking.findById(bookingId).populate({
+        path: 'show',
+        populate: {
+          path: 'movie',
+          model: 'Movie'
         }
+      }).populate('user');
+
+      // Safety check to prevent null access
+      if (!booking || !booking.user || !booking.show || !booking.show.movie) {
+        console.warn(`Booking or related data missing for booking ID ${bookingId}`);
+        return;
+      }
+
+      const showTime = new Date(booking.show.showDateTime).toLocaleTimeString('en-US', {
+        timeZone: 'Asia/Kolkata'
+      });
+
+      const showDate = new Date(booking.show.showDateTime).toLocaleDateString('en-US', {
+        timeZone: 'Asia/Kolkata'
+      });
+
+      await sendEmail({
+        to: booking.user.email,
+        subject: `Payment confirmation: '${booking.show.movie.originalTitle}' booked!`,
+        body: `
+        <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0;">🎟️ QuickShow Booking Confirmed!</h1>
+          </div>
+
+          <div style="padding: 24px; font-size: 16px; color: #333;">
+            <h2 style="margin-top: 0;">Hi ${booking.user.name},</h2>
+            <p>Your booking for <strong style="color: #F84565;">"${booking.show.movie.originalTitle}"</strong> is confirmed.</p>
+
+            <p>
+              <strong>Date:</strong> ${showDate}<br>
+              <strong>Time:</strong> ${showTime}
+            </p>
+            <p><strong>Booking ID:</strong> <span style="color: #F84565;">${booking._id}</span></p>
+            <p><strong>Seats:</strong> ${booking.bookedseats?.join(', ') || 'N/A'}</p>
+
+            <p>🎬 Enjoy the show and don’t forget to grab your popcorn!</p>
+          </div>
+
+          <div style="background-color: #f5f5f5; color: #777; padding: 16px; text-align: center; font-size: 14px;">
+            <p style="margin: 0;">Thanks for booking with us!<br>— The QuickShow Team</p>
+            <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow.com" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
+          </div>
+
+          <div style="text-align:center; padding: 20px;">
+            <img src="https://chart.googleapis.com/chart?cht=qr&chl=${booking._id}&chs=180x180&choe=UTF-8&chld=L|2" alt="QR Code" />
+          </div>
+        </div>
+        `
+      });
+
+    } catch (error) {
+      console.error("Error in sendbookingEmail function:", error);
     }
-)
+  }
+);
+
 
 export const functions = [userCreated, userUpdated, userDeleted, releaseSeatsandDeletebooking, deleteBookingAfterShow, sendbookingEmail];
