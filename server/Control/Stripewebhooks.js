@@ -25,6 +25,12 @@ export const stripeWebhooks = async (request, response) => {
                     isPaid: true,
                     paymentLink: '',
                 })
+
+                // send a email through nodemailer
+                await inngest.send({
+                    name : 'app/show.booked',
+                    data : {bookingId},
+                })
                 break;
             }
 
