@@ -1,29 +1,52 @@
 import { useEffect, useState } from 'react';
-import { dummyShowsData } from '../../assets/assets';
 import Loading from '../../components/Loading';
 import Title from '../../components/Title';
 import BlurCircle from '../../components/BlurCircle';
 import { CheckIcon, DeleteIcon, StarIcon } from 'lucide-react';
 import thousandConvert from '../../lib/ThousandCalculate';
 import toast from 'react-hot-toast';
+import { useAppContext } from '../../context/Appcontext';
 
 const Addshow = () => {
+  const { axios, getToken, user } = useAppContext();
   const currency = import.meta.env.VITE_CURRENCY;
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [dateTimeSelection, setDateTimeSelection] = useState({});
   const [dateTimeInput, setDateTimeInput] = useState('');
   const [showprice, setShowPrice] = useState('');
+  const [hasFetched, setHasFetched] = useState(false);
+
+  const fetchnowplaying = async () => {
+    try {
+      const { data } = await axios.get('/api/show/nowplaying', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+
+      if (data.success) {
+        setNowPlayingMovies(data.movies)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
-    setNowPlayingMovies(dummyShowsData);
-  }, []);
+  if (user && !hasFetched) {
+    fetchnowplaying();
+    setHasFetched(true);
+  }
+}, [user, hasFetched]);
 
   const handledatetime = () => {
-    if(!selectedMovie) {
+    if (!selectedMovie) {
       return toast.error('Select a movie')
     }
-    if(!showprice) {
+    if (!showprice) {
       return toast.error('Enter amount');
     }
     if (!dateTimeInput) return toast.error('Select date and time');
@@ -34,8 +57,6 @@ const Addshow = () => {
       if (!times.includes(time)) return { ...prev, [date]: [...times, time] };
       return prev;
     });
-    setShowPrice('');
-    setDateTimeInput('');
   };
 
   const handleRemoveTime = (date, time) => {
@@ -49,6 +70,38 @@ const Addshow = () => {
     });
   };
 
+  const handleadd = async () => {
+    try {
+      if (!selectedMovie || !showprice) {
+        return toast.error('Missing required fields')
+      }
+      const showsInput = Object.entries(dateTimeSelection).flatMap(([date, times]) =>
+        times.map((time) => ({ date, time }))
+      );
+      const payload = {
+        movieId: selectedMovie,
+        showsInput,
+        showprice: Number(showprice)
+      }
+      const { data } = await axios.post('/api/show/add', payload, {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        toast.success('Show added successfully');
+        setSelectedMovie(null);
+        setDateTimeInput('');
+        setDateTimeSelection({});
+        setShowPrice('');
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error('An error occured,please try again')
+    }
+  }
+
   return nowPlayingMovies.length > 0 ? (
     <div className="px-4 sm:px-6 lg:px-8">
       <Title text1="Add" text2="Shows" />
@@ -56,20 +109,20 @@ const Addshow = () => {
 
       <p className="mt-8 font-medium text-lg">Now Playing Movies</p>
       <div className="grid gap-6 mt-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-        {nowPlayingMovies.map((movie, index) => (
+        {nowPlayingMovies.slice(0, 22).map((movie, index) => (
           <div
             key={index}
             className={`rounded-lg relative cursor-pointer hover:-translate-y-1.5 transition duration-300`}
             onClick={() => !selectedMovie ? setSelectedMovie(movie.id) : (selectedMovie !== movie.id ? setSelectedMovie(movie.id) : setSelectedMovie(null))}
           >
             <div className="relative">
-              <img src={movie.poster_path} alt="poster" className="w-full object-cover brightness-90 rounded-lg" />
+              <img src={movie.primaryImage} alt="poster" className="w-full object-cover brightness-90 rounded-lg" />
               <div className="text-sm flex items-center justify-between p-2 bg-black/70 w-full rounded-b-lg absolute bottom-0 left-0">
                 <div className="flex items-center gap-1 text-gray-400 text-xs">
                   <StarIcon className="w-4 h-4 text-primary fill-primary" />
-                  <p>{movie.vote_average.toFixed(1)}</p>
+                  <p>{movie.averageRating}</p>
                 </div>
-                <p className="text-gray-400 text-xs">{thousandConvert(movie.vote_count)} Votes</p>
+                <p className="text-gray-400 text-xs">{thousandConvert(movie.numVotes)} Votes</p>
                 {selectedMovie === movie.id && (
                   <div className="absolute -top-6 right-2 flex items-center justify-center bg-primary h-5 w-5 rounded-md">
                     <CheckIcon className="w-4 h-4 text-white" strokeWidth={2.5} />
@@ -77,8 +130,8 @@ const Addshow = () => {
                 )}
               </div>
             </div>
-            <p className="text-base font-semibold truncate mt-2">{movie.title}</p>
-            <p className="text-sm text-gray-400">{movie.release_date}</p>
+            <p className="text-base font-semibold truncate mt-2">{movie.originalTitle}</p>
+            <p className="text-sm text-gray-400">{movie.releaseDate}</p>
           </div>
         ))}
       </div>
@@ -109,7 +162,7 @@ const Addshow = () => {
               onChange={(e) => setDateTimeInput(e.target.value)}
             />
             <button
-              className="bg-primary/80 text-white px-4 py-2 text-sm rounded-lg hover:bg-primary"
+              className="bg-primary/80 text-white px-4 py-2 text-sm rounded-lg hover:bg-primary cursor-pointer"
               onClick={handledatetime}
             >
               Add Time
@@ -146,7 +199,7 @@ const Addshow = () => {
         </div>
       )}
 
-      <button className="flex items-center px-5 py-2 mt-5 max-sm:text-sm bg-primary hover:bg-primary-dull transition rounded-lg font-medium max-md:px-3">
+      <button className="flex items-center px-5 py-2 mt-5 max-sm:text-sm bg-primary hover:bg-primary-dull transition rounded-lg font-medium max-md:px-3 cursor-pointer" onClick={handleadd}>
         Add Show
       </button>
     </div>

@@ -1,38 +1,39 @@
 import { useEffect, useState } from 'react';
-import { dummyShowsData } from '../../assets/assets';
 import Title from '../../components/Title';
 import Loading from '../../components/Loading';
 import formatDateTime from '../../lib/DateCalculate';
 import BlurCircle from '../../components/BlurCircle';
+import { useAppContext } from '../../context/Appcontext';
+import toast from 'react-hot-toast';
 
 const Listshow = () => {
+  const { axios, getToken, user } = useAppContext();
   const currency = import.meta.env.VITE_CURRENCY;
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchshows = async () => {
     try {
-      setShows([
-        {
-          movie: dummyShowsData[0],
-          showDateTime: '2025-06-30T02:30:00.000Z',
-          showPrice: 59,
-          occupiedSeats: {
-            A1: 'user_abc',
-            B1: 'user_def',
-            C1: 'user_ghi',
-          },
-        },
-      ]);
-      setLoading(false);
+      const { data } = await axios.get('/api/admin/getallshows', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }})
+        if(data.success) {
+          setShows(data.showdata);
+          setLoading(false);
+        } else {
+          toast.error(data.message);
+        }
     } catch (error) {
-      console.log(error);
+       toast.error(error);
     }
   };
 
   useEffect(() => {
-    fetchshows();
-  }, []);
+    if(user) {
+      fetchshows();
+    }
+  }, [user]);
 
   return !loading ? (
     <>
@@ -55,11 +56,11 @@ const Listshow = () => {
                 key={index}
                 className="border-b border-primary/10 bg-primary/5 even:bg-primary/10 whitespace-nowrap"
               >
-                <td className="p-3 max-w-[180px] truncate">{show.movie.title}</td>
+                <td className="p-3 max-w-[180px] truncate">{show.movie.originalTitle}</td>
                 <td className="p-3 max-w-[160px] truncate">{formatDateTime(show.showDateTime).replace('•',' at')}</td>
                 <td className="p-3">{Object.keys(show.occupiedSeats).length}</td>
                 <td className="p-3">
-                  {currency} {Object.keys(show.occupiedSeats).length * show.showPrice}
+                  {currency} {Object.keys(show.occupiedSeats).length * show.showPrice || 0}
                 </td>
               </tr>
             ))}

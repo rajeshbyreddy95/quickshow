@@ -6,41 +6,53 @@ import {
   UsersIcon
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { dummyDashboardData } from '../../assets/assets';
 import Loading from '../../components/Loading';
 import Title from '../../components/Title';
 import BlurCircle from '../../components/BlurCircle';
 import formatDateTime from '../../lib/DateCalculate';
+import { toast } from 'react-hot-toast';
+import { useAppContext } from '../../context/Appcontext';
 
 const Dashboard = () => {
   const currency = import.meta.env.VITE_CURRENCY;
-
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    totalBookings:0,
+    totalRevenue:0,
+    activeshows: [],
+    totalUsers: 0
+  });
   const [loading, setLoading] = useState(true);
+  const { axios, getToken, user } = useAppContext();
 
   const fetchDashboardData = async () => {
-    if (
-      dummyDashboardData &&
-      typeof dummyDashboardData.totalBookings === 'number' &&
-      typeof dummyDashboardData.totalRevenue === 'number' &&
-      typeof dummyDashboardData.totalUser === 'number' &&
-      Array.isArray(dummyDashboardData.activeShows)
-    ) {
-      setDashboardData(dummyDashboardData);
-      setLoading(false);
-    } else {
-      throw new Error('Invalid dashboard data format');
+    try {
+      const { data } = await axios.get('/api/admin/dashboarddata', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        setDashboardData(data.dashboarddata);
+        setLoading(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (user) {
+      fetchDashboardData();
+      console.log("dashboardData:", dashboardData);
+    }
+  }, [user]);
 
 
   if (!dashboardData) {
     return (
-      <Loading/>
+      <Loading />
     );
   }
 
@@ -57,12 +69,12 @@ const Dashboard = () => {
     },
     {
       title: 'Active Shows',
-      value: dashboardData.activeShows.length,
+      value: dashboardData.activeshows.length,
       icon: PlayCircleIcon
     },
     {
       title: 'Total Users',
-      value: dashboardData.totalUser,
+      value: dashboardData.totalUsers,
       icon: UsersIcon
     }
   ];
@@ -88,30 +100,32 @@ const Dashboard = () => {
       </div>
       <p className='mt-10 text-xl font-semibold'>Active Shows</p>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mt-8 px-2 sm:px-5'>
-        {dashboardData.activeShows.map((movie, index) => (
+        {dashboardData.activeshows.length > 0 ? (dashboardData.activeshows.map((movie, index) => (
           <div key={index} className='flex flex-col rounded-lg bg-primary/10 border-2 border-primary/20 overflow-hidden shadow-md hover:-translate-y-1 transition duration-300'>
             <img
-              src={movie.movie.poster_path}
+              src={movie.movie.primaryImage}
               alt="poster"
-              className='w-full h-64 object-cover'
+              className='w-full h-64 object-fit'
             />
             <p className='pt-3 px-3 text-lg font-semibold text-white'>
-              {movie.movie.title.length > 25
-                ? movie.movie.title.slice(0, 25) + '...'
-                : movie.movie.title}
+              {movie.movie.originalTitle.length > 25
+                ? movie.movie.originalTitle.slice(0, 25) + '...'
+                : movie.movie.originalTitle}
             </p>
             <div className='flex justify-between mt-2 px-3 text-white'>
-              <p className='text-lg font-medium'>{currency} {movie.showPrice}</p>
+              <p className='text-lg font-medium'>{currency} {movie.showprice}</p>
               <p className='flex items-center gap-1 text-gray-300 text-sm'>
                 <StarIcon className="w-4 h-4 text-primary fill-primary" />
-                {movie.movie.vote_average.toFixed(1)}
+                {movie.movie.averageRating}
               </p>
             </div>
             <p className='px-3 py-3 text-sm text-gray-500'>
               {formatDateTime(movie.showDateTime).replace('•', ' at')}
             </p>
           </div>
-        ))}
+        ))) : (
+          <p className='text-white'>No active shows found.</p>
+        )}
       </div>
     </div>
   ) : <Loading />

@@ -1,27 +1,39 @@
 import React, { useEffect, useState } from 'react'
-import { dummyBookingData } from '../../assets/assets';
 import Loading from '../../components/Loading';
 import Title from '../../components/Title';
 import formatDateTime from '../../lib/DateCalculate';
 import BlurCircle from '../../components/BlurCircle';
+import { useAppContext } from '../../context/Appcontext';
+import toast from 'react-hot-toast';
 
 const Listbookings = () => {
+   const { axios, getToken, user } = useAppContext();
   const currency = import.meta.env.VITE_CURRENCY;
-  const [bookings,setBookings] = useState(null);
+  const [bookings,setBookings] = useState([]);
   const [loading,setLoading] = useState(true);
 
   const fetchbookings = async() => {
     try {
-      setBookings(dummyBookingData);
-      setLoading(false);
+      const {data} = await axios.get('/api/admin/getallbookings', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }})
+        if(data.success) {
+          setBookings(data.bookings);
+          setLoading(false);
+        } else {
+          toast.error(data.message);
+        }
     } catch (error) {
-      console.log(error);
+      toast.error(error);
     }
   }
 
   useEffect(() => {
-    fetchbookings();
-  },[])
+    if(user) {
+      fetchbookings();
+    }
+  },[user])
 
   return !loading ? (
     <div className="w-full md:px-4 max-md:px-0 relative">
@@ -45,13 +57,13 @@ const Listbookings = () => {
                 className="border-b border-primary/10 bg-primary/5 even:bg-primary/10 whitespace-nowrap"
               >
                 <td className="p-3 max-w-[180px] truncate">{show.user.name}</td>
-                <td className="p-3 max-w-[180px] truncate">{show.show.movie.title}</td>
+                <td className="p-3 max-w-[180px] truncate">{show.show.movie.originalTitle}</td>
                 <td className="p-3 max-w-[160px] truncate">{formatDateTime(show.show.showDateTime).replace('•',' at')}</td>
-                <td className="p-3">{show.bookedSeats.map((seat) => {
+                <td className="p-3">{show.bookedseats.map((seat) => {
                    return seat
                 }).join(' ,')}</td>
                 <td className="p-3">
-                  {currency} {show.bookedSeats.length * show.amount}
+                  {currency} {show.bookedseats.length * show.show.showprice}
                 </td>
               </tr>
             ))}

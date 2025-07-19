@@ -1,42 +1,83 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { dummyShowsData, dummyDateTimeData, assets } from '../assets/assets';
+import { assets } from '../assets/assets';
 import Loading from '../components/Loading';
 import { ArrowRight, ClockIcon } from 'lucide-react';
 import timeFormat from '../lib/TimeFormat';
 import BlurCircle from '../components/BlurCircle';
 import toast from 'react-hot-toast';
+import { useAppContext } from '../context/Appcontext';
 
 const SeatLayout = () => {
+  const { axios, getToken, user } = useAppContext();
   const { id, date } = useParams();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [selectedTime, setSelectedTime] = useState(null);
   const [show, setShow] = useState(null);
+  const [occupiedSeats,setOccupiedSeats] = useState([]);
   const navigate = useNavigate();
   const groupRows = [['A', 'B'], ['C', 'D'], ['E', 'F'], ['G', 'H', 'I'], ['J', 'K', 'L']];
 
-  useEffect(() => {
-    const data = dummyShowsData.find((show) => show._id === id);
-    if (data) {
-      const showData = {
-        movie: data,
-        datetime: dummyDateTimeData[date] || [],
-      };
-      setShow(showData);
+  const fetchshow = async () => {
+    try {
+      const { data } = await axios.get(`/api/show/getmovie/${id}`);
+      if (data.success) {
+        setShow(data)
+      }
+    } catch (error) {
+      console.log(error);
     }
-  }, []);
-
-  if (!show || !Array.isArray(show.datetime)) {
-    return <Loading />;
   }
 
-  const handleProceed = () => {
-    if (selectedSeats.length < 1) {
-      return toast.error('Please select a time and seats')
+  const getoccupiedSeats = async() => {
+    try {
+      const {data} = await axios.get(`/api/booking/seats/${selectedTime.showId}`);
+      if(data.success) {
+        setOccupiedSeats(data.occupiedSeats)
     } else {
-      navigate('/my-bookings');
-      scrollTo(0,0);
+      toast.error(data.message);
     }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const createBooking = async() => {
+    try {
+      if(!user) {
+        return toast.error('Please login to proceed');
+      }
+
+      if(!selectedTime || !selectedSeats.length) {
+        return toast.error('Please select time and seat first');
+      }
+
+      const {data} = await axios.post(`/api/booking/create`, {showId : selectedTime.showId , selectedSeats}, {
+        headers : {
+                Authorization : `Bearer ${await getToken()}`
+            }})
+            if(data.success) {
+              window.location.href = data.url;
+            }else {
+              toast.error(data.message);
+            }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+      fetchshow();
+  }, []);
+
+  useEffect(() => {
+    if(selectedTime) {
+      getoccupiedSeats();
+    }
+  },[selectedTime])
+
+  if (!show) {
+    return <Loading />;
   }
 
   const handleSeatClick = (seatId) => {
@@ -45,6 +86,9 @@ const SeatLayout = () => {
     }
     if (!selectedSeats.includes(seatId) && selectedSeats.length > 4) {
       return toast('You can only select 5 seats');
+    }
+    if(occupiedSeats.includes(seatId)) {
+        return toast.error('Seat is already booked')
     }
     setSelectedSeats(prev => prev.includes(seatId) ? prev.filter(seat => seat !== seatId) : [...prev, seatId])
   }
@@ -60,9 +104,9 @@ const SeatLayout = () => {
               <button
                 key={seatId}
                 onClick={() => handleSeatClick(seatId)}
-                className={`aspect-square rounded border border-primary/60 text-xs sm:text-sm md:text-base transition ${selectedSeats.includes(seatId) && 'bg-primary text-white'
+                className={`aspect-square rounded border border-primary/60 text-xs md:text-base transition ${selectedSeats.includes(seatId) && 'bg-primary text-white'
                   } 
-              w-7 sm:w-6 md:w-8 lg:w-10 @max-xs:w-4`}
+              w-5 md:w-7 lg:w-9 @max-xs:w-4 ${occupiedSeats.includes(seatId) && 'opacity-30'}`}
                 title={seatId}
               >
                 {seatId}
@@ -74,14 +118,13 @@ const SeatLayout = () => {
     );
   };
 
-
   return (
     <div className='flex flex-col xl:flex-row px-6 md:px-16 lg:px-24 py-12 mt-30 md:pt-10 max-sm:mt-10'>
       <div className='relative w-60 bg-primary/10 border border-primary/20 rounded-lg py-10 h-max min-xl:sticky xl:top-30 max-xl:mt-0'>
         <BlurCircle top='-100px' left='0px' />
         <p className='text-lg font-semibold px-6'>Available Timings</p>
         <div className='mt-4 space-y-1'>
-          {show.datetime.map((item) => (
+          {show.datetime[date].map((item) => (
             <div
               key={item.showId}
               onClick={() => setSelectedTime(item)}
@@ -114,7 +157,7 @@ const SeatLayout = () => {
           </div>
         </div>
         <div className='flex justify-center mt-10 max-md:mt-0'>
-          <button onClick={handleProceed} className='flex gap-2 px-8 py-3 text-md bg-primary hover:bg-primary-dull rounded-full transtion font-medium cursor-pointer max-md:px-5 max-md:text-sm my-5 max-md:pb-2'>Proceed to checkout<ArrowRight className='hover:translate-x-1 transition duration-300 max-md:w-5 max-md:pb-1' /></button>
+          <button onClick={createBooking} className='flex gap-2 px-8 py-3 text-md bg-primary hover:bg-primary-dull rounded-full transtion font-medium cursor-pointer max-md:px-5 max-md:text-sm my-5 max-md:pb-2'>Proceed to checkout<ArrowRight className='hover:translate-x-1 transition duration-300 max-md:w-5 max-md:pb-1' /></button>
         </div>
       </div>
     </div>

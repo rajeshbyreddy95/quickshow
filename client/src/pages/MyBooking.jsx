@@ -5,22 +5,40 @@ import BlurCircle from '../components/BlurCircle';
 import { StarIcon } from 'lucide-react';
 import time from '../lib/Time';
 import formatDateTime from '../lib/DateCalculate';
+import { useAppContext } from '../context/Appcontext';
+import toast from 'react-hot-toast';
 
 const MyBooking = () => {
+  const {axios,getToken,user} = useAppContext();
   const currency = import.meta.env.VITE_CURRENCY;
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const getBooking = async () => {
-    setBookings(dummyBookingData);
-    setIsLoading(false);
+    try {
+      const {data} = await axios.get('/api/user/userbookings', {
+      headers : {
+                Authorization : `Bearer ${await getToken()}`
+            }})
+          if(data.success) {
+            setBookings(data.bookings);
+            setIsLoading(false);
+          } else {
+            toast.error(data.message);
+          }
+    } catch (error) {
+      console.log(error);
+    }
+
   };
 
   useEffect(() => {
-    getBooking();
-  }, []);
+    if(user) {
+      getBooking();
+    }
+  }, [user]);
 
-  return !isLoading ? (
+  return bookings.length > 0 ? (
     <div className="relative mt-20 px-4 sm:px-6 md:px-14 lg:px-24 pt-10 min-h-[70vh] mb-10 max-md:mt-15">
       <BlurCircle top="0" left="0" />
       <BlurCircle bottom="0" right="80vh" />
@@ -35,16 +53,16 @@ const MyBooking = () => {
           >
             <div className="flex gap-4">
               <img
-                src={data.show.movie.poster_path}
+                src={data.show.movie.primaryImage}
                 alt="Poster"
                 className="w-24 h-36 object-cover rounded-lg"
               />
               <div className="flex flex-col justify-between text-white text-sm">
-                <h1 className="text-3xl font-semibold">{data.show.movie.title}</h1>
+                <h1 className="text-3xl font-semibold">{data.show.movie.originalTitle}</h1>
                 <p>{time(data.show.movie.runtime)}</p>
                 <p className="flex items-center gap-1">
                   <StarIcon className="w-4 h-4 text-primary fill-primary" />
-                  {data.show.movie.vote_average}
+                  {data.show.movie.averageRating}
                 </p>
                 <p className='text-md'>{formatDateTime(data.show.showDateTime)}</p>
               </div>
@@ -57,10 +75,10 @@ const MyBooking = () => {
               </p>
               {!data.isPaid && <button className='px-4 py-1.5 mb-2 text-sm bg-primary hover:bg-primary-dull rounded-full transition font-medium cursor-pointer'>Pay Now</button>}
               </div>
-              <p>Total Tickets: <span className="font-semibold">{data.bookedSeats.length}</span></p>
+              <p>Total Tickets: <span className="font-semibold">{data.bookedseats.length}</span></p>
               <p>
                 Seat Numbers:{' '}
-                <span className="font-semibold">{data.bookedSeats.join(', ')}</span>
+                <span className="font-semibold">{data.bookedseats.join(', ')}</span>
               </p>
             </div>
           </div>
@@ -68,8 +86,8 @@ const MyBooking = () => {
       </div>
     </div>
   ) : (
-    <Loading />
-  );
+    <div className="flex items-center justify-center text-gray-400 min-h-screen text-4xl max-md:text-3xl font-semibold">No bookings found</div>
+  )
 };
 
 export default MyBooking;
