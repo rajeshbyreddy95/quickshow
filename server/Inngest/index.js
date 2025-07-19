@@ -67,22 +67,31 @@ export const inngest = new Inngest({ id: "movie-ticket-booking" });
 export const deleteBookingAfterShow = inngest.createFunction(
   { id: "delete-booking-after-show" },
   { event: "app/delete-booking-after-show" },
-  async ({ event }) => {
+  async ({ event,step }) => {
     const bookingId = event.data.bookingId;
-
     const booking = await Booking.findById(bookingId);
-    if (!booking) return;
 
+    if (!booking) return;
     const show = await Show.findById(booking.show);
     if (!show) return;
+    const showtime = new Date(show.showDateTime.getTime() + 5 * 60 * 1000);
+    await step.sleepUntil('Wait-for-5-minutes', showtime);
 
-    const now = new Date();
+    await step.run('check-booking', async() => {
+        const updatebooking = await Booking.findById(bookingId);
+        if(updatebooking.isPaid && showtime.getTime() < Date.now()) {
+            await Booking.findByIdAndDelete(booking._id);
 
-    if (booking.isPaid && new Date(show.showDateTime) < now) {
-      await Booking.findByIdAndDelete(bookingId);
-    } else {
+            const otherBookings = await Booking.find({ show: show._id });
+        if (otherBookings.length === 0) {
+          await Show.findByIdAndDelete(show._id);
+        } else {
+          console.log("Show not deleted, other bookings still exist.");
+        }
+      } else {
       console.log("Booking unpaid or show not over yet.");
     }
+    })
   }
 );
 

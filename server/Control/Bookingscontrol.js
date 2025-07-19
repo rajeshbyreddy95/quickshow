@@ -87,9 +87,8 @@ export const createBooking = async (req, res) => {
             name: "app/delete-booking-after-show",
             data: {
                 bookingId: booking._id.toString()
-            },
-            timestamp: new Date(show.showDateTime.getTime() + 5 * 60 * 1000)
-        });
+            }
+        })
 
         res.json({ success: true, url: session.url });
     } catch (error) {
