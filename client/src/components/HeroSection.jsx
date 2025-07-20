@@ -17,7 +17,7 @@ const HeroSection = () => {
                         <ClockIcon className='w-4 h-4 mx-1' />2hr 7min
                     </div>
                 </div>
-                <p className='max-w-lg mx-3 max-md:font-semibold min-2xl:max-w-xl text-gray-300 max-md:max-w-sm'>When the Time Variance Authority recruits Deadpool to fix a multiversal mess, he reluctantly teams up with a grumpy, out-of-retirement Wolverine. Expect chaos, claws, and classic Deadpool humor as the duo slashes through timelines to save… well, everything</p>
+                <p className='max-w-lg mx-3 max-md:font-semibold min-2xl:max-w-lg text-gray-300 max-md:max-w-sm'>When the Time Variance Authority recruits Deadpool to fix a multiversal mess, he reluctantly teams up with a grumpy, out-of-retirement Wolverine. Expect chaos, claws, and classic Deadpool humor as the duo slashes through timelines to save… well, everything</p>
                 <button className='flex items-center px-4 py-3 text-md min-2xl:my-6 font-medium bg-primary hover:bg-primary-dull transition rounded-full cursor-pointer my-4 mx-3 max-md:text-sm' onClick={() => { navigate('/movies') }}>
                     Explore Movies
                     <ArrowRight className='w-5 h-5 ml-1' />
