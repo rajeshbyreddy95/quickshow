@@ -205,7 +205,7 @@ const sendNewMovieEmail = inngest.createFunction(
                 <p><strong>Genre:</strong> ${movie.genres.map((genre) => genre).join(', ')}</p>
                 <p>${movie.description}</p>
 
-                <img src="${movie.thumbnails[1].url}" alt="${movie.originalTitle} Poster" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 4px; margin-top: 16px;" />
+                <img src="${movie.primaryImage}" alt="${movie.originalTitle} Poster" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 4px; margin-top: 16px;" />
 
                 <div style="margin-top: 20px; text-align: center;">
                 <a href="www.goggle.com" style="background-color: #F84565; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">🎟️ Book Your Tickets</a>
