@@ -106,7 +106,7 @@ const SeatLayout = () => {
                 onClick={() => handleSeatClick(seatId)}
                 className={`aspect-square rounded border border-primary/60 text-xs md:text-base transition ${selectedSeats.includes(seatId) && 'bg-primary text-white'
                   } 
-              w-5 md:w-7 lg:w-9 @max-xs:w-4 ${occupiedSeats.includes(seatId) && 'opacity-30'}`}
+              w-8 md:w-8 lg:w-10 @max-xs:w-6 ${occupiedSeats.includes(seatId) && 'opacity-30'}`}
                 title={seatId}
               >
                 {seatId}
