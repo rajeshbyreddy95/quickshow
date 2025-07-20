@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import Booking from "../models/Booking.js";
 import Show from "../models/Show.js";
 import sendEmail from "../config/nodemailer.js";
+import Movie from "../models/Movie.js";
 
 
 export const inngest = new Inngest({ id: "movie-ticket-booking" });
@@ -67,86 +68,85 @@ const releaseSeatsandDeletebooking = inngest.createFunction(
 )
 
 export const deleteBookingAfterShow = inngest.createFunction(
-  { id: "delete-booking-after-show" },
-  { event: "app/delete-booking-after-show" },
-  async ({ event, step }) => {
-    const bookingId = event.data.bookingId;
-    const booking = await Booking.findById(bookingId);
-    if (!booking) {
-      console.warn(`Booking with ID ${bookingId} not found initially.`);
-      return;
-    }
-
-    const show = await Show.findById(booking.show);
-    if (!show) {
-      console.warn(`Show with ID ${booking.show} not found.`);
-      return;
-    }
-
-    const showtimeWithBuffer = new Date(show.showDateTime.getTime() + 15 * 60 * 1000);
-
-    await step.sleepUntil('Wait-for-15-minutes-after-show', showtimeWithBuffer);
-
-    await step.run('check-and-delete-booking-and-show', async () => {
-      const updatedBooking = await Booking.findById(bookingId);
-
-      if (!updatedBooking) {
-        console.warn(`Booking with ID ${bookingId} already deleted.`);
-        return;
-      }
-
-      if (updatedBooking.isPaid && Date.now() >= showtimeWithBuffer.getTime()) {
-        await Booking.findByIdAndDelete(updatedBooking._id);
-
-        const remainingBookings = await Booking.find({ show: show._id });
-
-        if (remainingBookings.length === 0) {
-          await Show.findByIdAndDelete(show._id);
-          console.log(`Show ${show._id} deleted because no bookings left.`);
-        } else {
-          console.log("Show not deleted; other bookings still exist.");
+    { id: "delete-booking-after-show" },
+    { event: "app/delete-booking-after-show" },
+    async ({ event, step }) => {
+        const bookingId = event.data.bookingId;
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            console.warn(`Booking with ID ${bookingId} not found initially.`);
+            return;
         }
-      } else {
-        console.log("Booking is unpaid or showtime hasn't passed yet.");
-      }
-    });
-  }
+
+        const show = await Show.findById(booking.show);
+        if (!show) {
+            console.warn(`Show with ID ${booking.show} not found.`);
+            return;
+        }
+
+        const showtimeWithBuffer = new Date(show.showDateTime.getTime() + 15 * 60 * 1000);
+
+        await step.sleepUntil('Wait-for-15-minutes-after-show', showtimeWithBuffer);
+
+        await step.run('check-and-delete-booking-and-show', async () => {
+            const updatedBooking = await Booking.findById(bookingId);
+
+            if (!updatedBooking) {
+                console.warn(`Booking with ID ${bookingId} already deleted.`);
+                return;
+            }
+
+            if (updatedBooking.isPaid && Date.now() >= showtimeWithBuffer.getTime()) {
+                await Booking.findByIdAndDelete(updatedBooking._id);
+
+                const remainingBookings = await Booking.find({ show: show._id });
+
+                if (remainingBookings.length === 0) {
+                    await Show.findByIdAndDelete(show._id);
+                    console.log(`Show ${show._id} deleted because no bookings left.`);
+                } else {
+                    console.log("Show not deleted; other bookings still exist.");
+                }
+            } else {
+                console.log("Booking is unpaid or showtime hasn't passed yet.");
+            }
+        });
+    }
 );
 
 
 const sendbookingEmail = inngest.createFunction(
-  { id: "send-booking-confirmation-mail" },
-  { event: 'app/show.booked' },
-  async ({ event }) => {
-    const { bookingId } = event.data;
+    { id: "send-booking-confirmation-mail" },
+    { event: 'app/show.booked' },
+    async ({ event }) => {
+        const { bookingId } = event.data;
 
-    try {
-      const booking = await Booking.findById(bookingId).populate({
-        path: 'show',
-        populate: {
-          path: 'movie',
-          model: 'Movie'
-        }
-      }).populate('user');
+        try {
+            const booking = await Booking.findById(bookingId).populate({
+                path: 'show',
+                populate: {
+                    path: 'movie',
+                    model: 'Movie'
+                }
+            }).populate('user');
 
-      // Safety check to prevent null access
-      if (!booking || !booking.user || !booking.show || !booking.show.movie) {
-        console.warn(`Booking or related data missing for booking ID ${bookingId}`);
-        return;
-      }
+            if (!booking || !booking.user || !booking.show || !booking.show.movie) {
+                console.warn(`Booking or related data missing for booking ID ${bookingId}`);
+                return;
+            }
 
-      const showTime = new Date(booking.show.showDateTime).toLocaleTimeString('en-US', {
-        timeZone: 'Asia/Kolkata'
-      });
+            const showTime = new Date(booking.show.showDateTime).toLocaleTimeString('en-US', {
+                timeZone: 'Asia/Kolkata'
+            });
 
-      const showDate = new Date(booking.show.showDateTime).toLocaleDateString('en-US', {
-        timeZone: 'Asia/Kolkata'
-      });
+            const showDate = new Date(booking.show.showDateTime).toLocaleDateString('en-US', {
+                timeZone: 'Asia/Kolkata'
+            });
 
-      await sendEmail({
-        to: booking.user.email,
-        subject: `Payment confirmation: '${booking.show.movie.originalTitle}' booked!`,
-        body: `
+            await sendEmail({
+                to: booking.user.email,
+                subject: `Payment confirmation: '${booking.show.movie.originalTitle}' booked!`,
+                body: `
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
             <h1 style="margin: 0;">🎟️ QuickShow Booking Confirmed!</h1>
@@ -170,19 +170,63 @@ const sendbookingEmail = inngest.createFunction(
             <p style="margin: 0;">Thanks for booking with us!<br>— The QuickShow Team</p>
             <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow.com" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
           </div>
+        </div>`
+            });
 
-          <div style="text-align:center; padding: 20px;">
-            <img src="https://chart.googleapis.com/chart?cht=qr&chl=${booking._id}&chs=180x180&choe=UTF-8&chld=L|2" alt="QR Code" />
-          </div>
-        </div>
-        `
-      });
-
-    } catch (error) {
-      console.error("Error in sendbookingEmail function:", error);
+        } catch (error) {
+            console.error("Error in sendbookingEmail function:", error);
+        }
     }
-  }
 );
 
+const sendNewMovieEmail = inngest.createFunction(
+    { id: 'send-new-movie-notification' },
+    { event: 'app/show.added' },
+    async ({ event }) => {
+        const { movieId } = event.data;
+        const users = await User.find({});
+        const movie = await Movie.findById(movieId);
 
-export const functions = [userCreated, userUpdated, userDeleted, releaseSeatsandDeletebooking, deleteBookingAfterShow, sendbookingEmail];
+        if(!movie) return "No movie found";
+
+        for (const user of users) {
+            const userEmail = user.email;
+            const userName = user.name;
+
+            const subject = `🎬 New Show Added: ${movie.originalTitle}`;
+            const body = `<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
+                <h2 style="margin: 0;">Hi ${userName},</h2>
+            </div>
+
+            <div style="padding: 24px; color: #333;">
+                <h2 style="margin-top: 0;">"${movie.originalTitle}" is Now Available on QuickShow!</h2>
+                <p><strong>Release Date:</strong> ${movie.releaseDate}</p>
+                <p><strong>Genre:</strong> ${movie.genres.map((genre) => genre).join(', ')}</p>
+                <p>${movie.description}</p>
+
+                <img src="${movie.primaryImage}" alt="${movie.originalTitle} Poster" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 4px; margin-top: 16px;" />
+
+                <div style="margin-top: 20px; text-align: center;">
+                <a href="www.goggle.com" style="background-color: #F84565; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">🎟️ Book Your Tickets</a>
+                </div>
+            </div>
+
+            <div style="background-color: #f5f5f5; color: #777; padding: 16px; text-align: center; font-size: 14px;">
+                <p style="margin: 0;">Thanks for staying with QuickShow!<br>We bring the cinema to your fingertips.</p>
+                <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow.com" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
+            </div>
+            </div>`
+
+            await sendEmail({
+                to : userEmail,
+                subject,
+                body,
+            })
+        }
+        return {message : 'Notification sent'}
+    }
+)
+
+
+export const functions = [userCreated, userUpdated, userDeleted, releaseSeatsandDeletebooking, deleteBookingAfterShow, sendbookingEmail, sendNewMovieEmail];

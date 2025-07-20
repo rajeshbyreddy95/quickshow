@@ -71,6 +71,11 @@ export const addshow = async (req, res) => {
       await Show.insertMany(showstoCreate);
     }
 
+    await inngest.send({
+      name : 'send-new-movie-notification',
+      data : {movieId : movie._id}
+    })
+
     res.json({ success: true, message: "Show(s) added successfully." });
   } catch (error) {
     res.json({ success: false, message: error.message });
