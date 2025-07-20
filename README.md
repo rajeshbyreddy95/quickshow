@@ -10,4 +10,3 @@
 🧾 Admin Dashboard to manage movies, shows, and revenue
 📊 Monthly revenue and booking analytics
 
-### Made by -- Sreejib Nandy 
