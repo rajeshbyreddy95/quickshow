@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import { useAppContext } from '../context/Appcontext';
 
 const Moviedetails = () => {
-  const { shows, axios, getToken, user, fetchfavorites, favorites,setFavorites } = useAppContext();
+  const { shows, axios, getToken, user, fetchfavorites, favorites } = useAppContext();
   const { id } = useParams();
   const [show, setShow] = useState(null);
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const Moviedetails = () => {
         />
         <div className="text-white relative flex flex-col gap-4 max-w-xl">
           <BlurCircle top="0px" left="50px" />
-          <p className='text-xl uppercase text-primary font-medium'>{movie.original_language.includes('en') ? 'English' : 'Hindi'}</p>
+          <p className='text-xl uppercase text-primary font-medium'>{movie.original_language.includes('en') && 'English' }</p>
           <h1 className='text-4xl font-bold leading-snug'>{movie.originalTitle}</h1>
           <div className="flex items-center gap-2">
             <Star className='fill-primary text-primary w-5 h-5' />
