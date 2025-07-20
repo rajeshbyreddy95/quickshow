@@ -73,7 +73,7 @@ export const addshow = async (req, res) => {
     }
 
     await inngest.send({
-      name : 'send-new-movie-notification',
+      name : 'app/show.added',
       data : {movieId : movie._id}
     })
 
