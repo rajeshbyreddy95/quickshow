@@ -196,7 +196,7 @@ const sendNewMovieEmail = inngest.createFunction(
             const subject = `🎬 New Show Added: ${movie.originalTitle}`;
             const body = `<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
             <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
-                <h2 style="margin: 0;">Hi ${userName},</h2>
+                <h1 style="margin: 0;">Hi ${userName},</h1>
             </div>
 
             <div style="padding: 24px; color: #333;">
@@ -205,7 +205,7 @@ const sendNewMovieEmail = inngest.createFunction(
                 <p><strong>Genre:</strong> ${movie.genres.map((genre) => genre).join(', ')}</p>
                 <p>${movie.description}</p>
 
-                <img src="${movie.primaryImage}" alt="${movie.originalTitle} Poster" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 4px; margin-top: 16px;" />
+                <img src="${movie.thumbnails[1].url}" alt="${movie.originalTitle} Poster" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 4px; margin-top: 16px;" />
 
                 <div style="margin-top: 20px; text-align: center;">
                 <a href="www.goggle.com" style="background-color: #F84565; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">🎟️ Book Your Tickets</a>
