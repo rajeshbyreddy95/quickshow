@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Movie from '../models/Movie.js';
 import Show from '../models/Show.js';
+import { inngest } from '../Inngest/index.js';
 
 // Get 250 top movies from IMDB RapidAPI
 export const getnowplayingMovies = async (req, res) => {
