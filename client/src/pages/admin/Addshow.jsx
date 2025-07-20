@@ -198,7 +198,7 @@ const Addshow = () => {
                     <DeleteIcon
                       onClick={() => handleRemoveTime(date, time)}
                       width={15}
-                      className="ml-2 text-red-500 hover:text-red-700 cursor-pointer"
+                      className="ml-2 text-violet-500 hover:text-violet-700 cursor-pointer"
                     />
                   </div>
                 ))}

@@ -129,19 +129,19 @@ const sendbookingEmail = inngest.createFunction(
                 subject: `Payment confirmation: '${booking.show.movie.originalTitle}' booked!`,
                 body: `
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
+          <div style="background-color: #7b2cbf; color: white; padding: 20px; text-align: center;">
             <h1 style="margin: 0;">🎟️ QuickShow Booking Confirmed!</h1>
           </div>
 
           <div style="padding: 24px; font-size: 16px; color: #333;">
             <h2 style="margin-top: 0;">Hi ${booking.user.name},</h2>
-            <p>Your booking for <strong style="color: #F84565;">"${booking.show.movie.originalTitle}"</strong> is confirmed.</p>
+            <p>Your booking for <strong style="color: #7b2cbf;">"${booking.show.movie.originalTitle}"</strong> is confirmed.</p>
 
             <p>
               <strong>Date:</strong> ${showDate}<br>
               <strong>Time:</strong> ${showTime}
             </p>
-            <p><strong>Booking ID:</strong> <span style="color: #F84565;">${booking._id}</span></p>
+            <p><strong>Booking ID:</strong> <span style="color: #7b2cbf;">${booking._id}</span></p>
             <p><strong>Seats:</strong> ${booking.bookedseats?.join(', ') || 'N/A'}</p>
 
             <p>🎬 Enjoy the show and don’t forget to grab your popcorn!</p>
@@ -150,7 +150,7 @@ const sendbookingEmail = inngest.createFunction(
 
           <div style="background-color: #f5f5f5; color: #777; padding: 16px; text-align: center; font-size: 14px;">
             <p style="margin: 0;">Thanks for booking with us!<br>— The QuickShow Team</p>
-            <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow-ecru.vercel.app" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
+            <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow-ecru.vercel.app" style="color: #7b2cbf; text-decoration: none;">QuickShow</a></p>
           </div>
         </div>`
             });
@@ -177,7 +177,7 @@ const sendNewMovieEmail = inngest.createFunction(
 
             const subject = `🎬 New Show Added: ${movie.originalTitle}`;
             const body = `<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <div style="background-color: #F84565; color: white; padding: 20px; text-align: center;">
+            <div style="background-color: #7b2cbf; color: white; padding: 20px; text-align: center;">
                 <h1 style="margin: 0;">Hi ${userName},</h1>
             </div>
 
@@ -194,9 +194,9 @@ const sendNewMovieEmail = inngest.createFunction(
                 </div>
             </div>
 
-            <div style="background-color: #f5f5f5; color: #777; padding: 16px; text-align: center; font-size: 14px;">
+            <div style="background-color: #7b2cbf; color: #777; padding: 16px; text-align: center; font-size: 14px;">
                 <p style="margin: 0;">Thanks for staying with QuickShow!<br>We bring the cinema to your fingertips.</p>
-                <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow-ecru.vercel.app" style="color: #F84565; text-decoration: none;">QuickShow</a></p>
+                <p style="margin: 4px 0 0;">📍 Visit us: <a href="https://quickshow-ecru.vercel.app" style="color: #7b2cbf; text-decoration: none;">QuickShow</a></p>
             </div>
             </div>`
 
