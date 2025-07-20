@@ -21,7 +21,7 @@ const Adminsidebar = () => {
     <>
     <div>
     <MenuIcon className='w-8 h-8 min-md:hidden absolute top-5 left-5' onClick={() => setisOpen(!isOpen)}/>
-      <div className={`flex flex-col h-[calc(100vh-72px)] items-center pt-8 max-md:bg-primary/10 max-md:backdrop-blur-lg max-w-55 w-full border-r border-gray-300/30 text-lg max-md:text-md max-md:absolute z-50 transition-[width] overflow-hidden duration-300 ${isOpen ? 'max-md:w-full' : 'max-md:w-0'}`}>
+      <div className={`flex flex-col h-[calc(100vh-72px)] items-center pt-8 max-md:bg-primary/20 max-md:backdrop-blur-xl max-w-55 w-full border-r border-gray-300/30 text-lg max-md:text-md max-md:absolute z-50 transition-[width] overflow-hidden duration-300 ${isOpen ? 'max-md:w-full' : 'max-md:w-0'}`}>
             <img src={user.imageUrl} alt="User" className='w-14 h-14 md:h-16 md:w-16 rounded-full mx-20'/>
             <p className='py-2 text-base font-medium max-md:hidden'>{user.firstName} {user.lastName}</p>
             <div className='w-full'>

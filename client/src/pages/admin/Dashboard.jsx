@@ -45,7 +45,6 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       fetchDashboardData();
-      console.log("dashboardData:", dashboardData);
     }
   }, [user]);
 
@@ -90,7 +89,7 @@ const Dashboard = () => {
           return (<div key={index} className='flex justify-between rounded-lg bg-primary/10 border-2 border-primary/20'>
             <div className='flex flex-col py-4 items-start justify-center pr-5 pl-4'>
               <p className='text-sm'>{data.title}</p>
-              <p className='text-2xl font-semibold pt-1'>{data.value}</p>
+              <p className='text-2xl font-semibold pt-1 max-md:text-xl'>{data.value}</p>
             </div>
             <div className='flex items-center justify-center pr-3'>
               <data.icon className="w-7 h-7" />
@@ -105,7 +104,7 @@ const Dashboard = () => {
             <img
               src={movie.movie.primaryImage}
               alt="poster"
-              className='w-full h-64 object-fit'
+              className='w-full h-64 object-cover'
             />
             <p className='pt-3 px-3 text-lg font-semibold text-white'>
               {movie.movie.originalTitle.length > 25

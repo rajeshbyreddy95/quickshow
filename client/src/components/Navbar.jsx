@@ -26,7 +26,7 @@ const Navbar = () => {
       </div>
       <div className='w-40 flex items-center justify-around'>
         <SearchIcon className='max-md:hidden w-6 h-6 mr-4' />
-        {!user ? (<button onClick={openSignIn} className='sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition px-4 py-1 rounded-full font-medium cursor-pointer'>Login</button>) :
+        {!user ? (<button onClick={openSignIn} className='sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition px-4 py-1 rounded-full font-medium cursor-pointer max-md:text-sm'>Login</button>) :
           (<UserButton>
             <UserButton.MenuItems>
               <UserButton.Action label='My Bookings' labelIcon={<TicketPlus width={15} />} onClick={() => { navigate('/my-bookings') }} />

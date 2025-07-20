@@ -67,51 +67,32 @@ const releaseSeatsandDeletebooking = inngest.createFunction(
     }
 )
 
-export const deleteBookingAfterShow = inngest.createFunction(
-    { id: "delete-booking-after-show" },
-    { event: "app/delete-booking-after-show" },
-    async ({ event, step }) => {
-        const bookingId = event.data.bookingId;
-        const booking = await Booking.findById(bookingId);
-        if (!booking) {
-            console.warn(`Booking with ID ${bookingId} not found initially.`);
-            return;
-        }
+export const cleanupOldData = inngest.createFunction(
+  { id: "cleanup-old-bookings-shows" },
+  { cron: "0 0 1 1,7 *" }, // Runs at 00:00 on Jan 1 and Jul 1
+  async ({ step }) => {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        const show = await Show.findById(booking.show);
-        if (!show) {
-            console.warn(`Show with ID ${booking.show} not found.`);
-            return;
-        }
+    return step.run("delete-old-bookings-and-shows", async () => {
+      const deletedBookings = await Booking.deleteMany({
+        createdAt: { $lt: sixMonthsAgo },
+      });
 
-        const showtimeWithBuffer = new Date(show.showDateTime.getTime() + 15 * 60 * 1000);
+      const deletedShows = await Show.deleteMany({
+        showDateTime: { $lt: sixMonthsAgo },
+      });
 
-        await step.sleepUntil('Wait-for-15-minutes-after-show', showtimeWithBuffer);
+      console.log(
+        `Deleted ${deletedBookings.deletedCount} old bookings and ${deletedShows.deletedCount} shows.`
+      );
 
-        await step.run('check-and-delete-booking-and-show', async () => {
-            const updatedBooking = await Booking.findById(bookingId);
-
-            if (!updatedBooking) {
-                console.warn(`Booking with ID ${bookingId} already deleted.`);
-                return;
-            }
-
-            if (updatedBooking.isPaid && Date.now() >= showtimeWithBuffer.getTime()) {
-                await Booking.findByIdAndDelete(updatedBooking._id);
-
-                const remainingBookings = await Booking.find({ show: show._id });
-
-                if (remainingBookings.length === 0) {
-                    await Show.findByIdAndDelete(show._id);
-                    console.log(`Show ${show._id} deleted because no bookings left.`);
-                } else {
-                    console.log("Show not deleted; other bookings still exist.");
-                }
-            } else {
-                console.log("Booking is unpaid or showtime hasn't passed yet.");
-            }
-        });
-    }
+      return {
+        deletedBookings: deletedBookings.deletedCount,
+        deletedShows: deletedShows.deletedCount,
+      };
+    });
+  }
 );
 
 
@@ -165,6 +146,7 @@ const sendbookingEmail = inngest.createFunction(
 
             <p>🎬 Enjoy the show and don’t forget to grab your popcorn!</p>
           </div>
+          <img src="${booking.show.movie.primaryImage}" alt="${booking.show.movie.originalTitle} Poster" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 4px; margin-top: 16px;" />
 
           <div style="background-color: #f5f5f5; color: #777; padding: 16px; text-align: center; font-size: 14px;">
             <p style="margin: 0;">Thanks for booking with us!<br>— The QuickShow Team</p>

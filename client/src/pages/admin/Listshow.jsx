@@ -60,7 +60,7 @@ const Listshow = () => {
                 <td className="p-3 max-w-[160px] truncate">{formatDateTime(show.showDateTime).replace('•',' at')}</td>
                 <td className="p-3">{Object.keys(show.occupiedSeats).length}</td>
                 <td className="p-3">
-                  {currency} {Object.keys(show.occupiedSeats).length * show.showPrice || 0}
+                  {currency} {Object.keys(show.occupiedSeats).length * show.showprice}
                 </td>
               </tr>
             ))}

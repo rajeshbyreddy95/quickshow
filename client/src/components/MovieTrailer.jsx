@@ -8,7 +8,7 @@ const MovieTrailer = () => {
 
   return (
     <div className='px-4 sm:px-6 md:px-8 lg:px-16 xl:px-20 py-10 overflow-hidden'>
-      <p className='text-gray-300 font-medium text-lg sm:text-md max-w-lg pl-6 sm:pl-0'>
+      <p className='text-gray-300 font-medium text-lg max-md:text-sm max-w-lg pl-6 sm:pl-0'>
         Trailers
       </p>
 

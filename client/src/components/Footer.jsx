@@ -18,8 +18,8 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-wrap gap-12 text-gray-300"> 
-            <div className="flex flex-col gap-2 sm:text-sm">
-              <p className="font-semibold text-base sm:text-sm">Company</p>
+            <div className="flex flex-col gap-2 sm:text-xs">
+              <p className="font-semibold text-base sm:text-xs">Company</p>
               {['Home', 'About us', 'Contact us', 'Privacy policy'].map((item, i) => (
                 <p
                   key={i}
@@ -31,7 +31,7 @@ const Footer = () => {
               ))}
             </div>
 
-            <div className="flex flex-col gap-2 sm:text-sm">
+            <div className="flex flex-col gap-2 sm:text-xs">
               <p className="font-semibold text-base sm:text-sm">Get in touch</p>
               <p className="cursor-pointer hover:underline">+1-234-567-890</p>
               <p className="cursor-pointer hover:underline">contact@example.com</p>
@@ -41,7 +41,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <p className="text-center sm:text-sm py-4 text-gray-400">
+      <p className="text-center sm:text-xs py-4 text-gray-400">
         © {new Date().getFullYear()} QuickShow. All Rights Reserved.
       </p>
     </>
