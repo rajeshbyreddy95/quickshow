@@ -83,13 +83,6 @@ export const createBooking = async (req, res) => {
             }
         })
 
-        await inngest.send({
-            name: "app/delete-booking-after-show",
-            data: {
-                bookingId: booking._id.toString()
-            }
-        })
-
         res.json({ success: true, url: session.url });
     } catch (error) {
         console.error("Stripe session error:", error);
