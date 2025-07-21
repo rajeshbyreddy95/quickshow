@@ -3,11 +3,17 @@
 
 ### 🚀 Features : --
 🎟️ Book movie tickets with live seat selection
+
 🔐 Authentication via Clerk
+
 💳 Secure Payments using Stripe
+
 📧 Email Notifications with Nodemailer
+
 ⏱️ Background Jobs using Inngest
+
 🧾 Admin Dashboard to manage movies, shows, and revenue
+
 📊 Monthly revenue and booking analytics
 
 ### Home Page
