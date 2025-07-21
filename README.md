@@ -10,3 +10,5 @@
 🧾 Admin Dashboard to manage movies, shows, and revenue
 📊 Monthly revenue and booking analytics
 
+### Home Page
+![Home Page](./Screenshots/Home.png)
