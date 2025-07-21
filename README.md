@@ -12,3 +12,20 @@
 
 ### Home Page
 ![Home Page](./Screenshots/Home.png)
+### Movies Page
+![Movies Page](./Screenshots/Now-showing.png)
+### Movie Details Page
+![MovieDetails Page](./Screenshots/Moviedetails.png)
+### Cast & Dates
+![Cast&Dates](./Screenshots/Casts&Dates.png)
+### Seat Layout Page
+![Seat](./Screenshots/Seatlayout.png)
+### Bookings Page
+![Bookings](./Screenshots/Bookings.png)
+### Dashboard Page
+![Dashboard](./Screenshots/Dashboard.png)
+### List Shows Page
+![ListShows](./Screenshots/Listshows.png)
+### List Bookings Page
+![ListBookings](./Screenshots/Listbookings.png)
+
