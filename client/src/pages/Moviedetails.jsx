@@ -77,14 +77,14 @@ const Moviedetails = () => {
           <div className="flex items-center gap-2">
             <Star className='fill-primary text-primary w-5 h-5' />
             <p className='text-md text-gray-200'>
-              {movie.averageRating} User Rating
+              {movie.averageRating ? movie.averageRating : ''} User Rating
             </p>
           </div>
           <p className='text-gray-300 text-sm md:text-base leading-relaxed'>
             {movie.description}
           </p>
           <p className='text-sm text-gray-100 font-medium'>
-            {movie.runtime ? timeCalculate(movie.runtime) : ''} • {movie.genres.map((genre) => genre).join(', ')} • {new Date(movie.releaseDate).getFullYear()}
+            {movie.runtime ? timeCalculate(movie.runtime) : ''} • {movie.genres.map((genre) => genre).join(', ')} • {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : ''}
           </p>
           <div className="flex flex-wrap gap-4 mt-4 max-md:gap-2">
             <a href={movie.trailer && movie.trailer} target="_blank" className="flex items-center px-5 py-2 bg-gray-700 hover:bg-gray-800 transition rounded-lg text-sm font-medium max-md:px-3">
