@@ -84,7 +84,7 @@ const Moviedetails = () => {
             {movie.description}
           </p>
           <p className='text-sm text-gray-100 font-medium'>
-            {timeCalculate(movie.runtime)} • {movie.genres.map((genre) => genre).join(', ')} • {new Date(movie.releaseDate).getFullYear()}
+            {movie.runtime ? timeCalculate(movie.runtime) : ''} • {movie.genres.map((genre) => genre).join(', ')} • {new Date(movie.releaseDate).getFullYear()}
           </p>
           <div className="flex flex-wrap gap-4 mt-4 max-md:gap-2">
             <a href={movie.trailer && movie.trailer} target="_blank" className="flex items-center px-5 py-2 bg-gray-700 hover:bg-gray-800 transition rounded-lg text-sm font-medium max-md:px-3">
