@@ -13,8 +13,8 @@ const Movies = () => {
         <BlurCircle top='500px' left='0px' />
       </div>
       <div className='flex flex-wrap justify-center gap-8 mt-8'>
-        {shows.map((movie) => (
-          <MovieCard key={movie._id} movie={movie} />
+        {shows.filter(Boolean).map((movie) => (
+          movie._id ? <MovieCard key={movie._id} movie={movie} /> : null
         ))}
       </div>
     </div>

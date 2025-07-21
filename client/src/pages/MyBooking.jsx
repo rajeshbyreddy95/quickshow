@@ -43,8 +43,8 @@ const MyBooking = () => {
       <h1 className="text-lg sm:text-xl font-medium text-gray-300 mb-6">Your Bookings</h1>
 
       <div className="flex flex-wrap gap-6 justify-start">
-        {bookings.map((data, index) => (
-          <div
+        {bookings.map((data, index) => {if (!data.show?.movie) return null;
+          return (<div
             key={index}
             className="w-full md:w-[48%] bg-primary/5 border border-primary/20 rounded-xl p-3 flex flex-col gap-4"
           >
@@ -79,7 +79,7 @@ const MyBooking = () => {
               </p>
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   ) : (

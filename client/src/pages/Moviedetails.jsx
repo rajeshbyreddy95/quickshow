@@ -28,7 +28,7 @@ const Moviedetails = () => {
     }
   };
   useEffect(() => {
-      getMovie();
+    getMovie();
   }, [id]);
 
   const handleDate = () => {
@@ -36,23 +36,24 @@ const Moviedetails = () => {
   }
 
   const handlefavorite = async () => {
-   try {
-     if(!user) {
-      return toast.error('Please login to proceed');
-     }
-     const {data} = await axios.post('/api/user/updatefavorites', {movieId: id}, {
-      headers : {
-                Authorization : `Bearer ${await getToken()}`
-            }})
-    if(data.success) {
-      await fetchfavorites();
-      toast.success(data.message);
-    } else {
-      toast.error(data.message);
-    }
-   } catch (error) {
+    try {
+      if (!user) {
+        return toast.error('Please login to proceed');
+      }
+      const { data } = await axios.post('/api/user/updatefavorites', { movieId: id }, {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        await fetchfavorites();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
       console.log(error);
-   }
+    }
   }
 
   if (!show) {
@@ -72,7 +73,7 @@ const Moviedetails = () => {
         />
         <div className="text-white relative flex flex-col gap-4 max-w-xl">
           <BlurCircle top="0px" left="50px" />
-          <p className='text-xl uppercase text-primary font-medium'>{movie.original_language.includes('en') && 'English' }</p>
+          <p className='text-xl uppercase text-primary font-medium'>{movie.original_language.includes('en') && 'English'}</p>
           <h1 className='text-4xl font-bold leading-snug'>{movie.originalTitle}</h1>
           <div className="flex items-center gap-2">
             <Star className='fill-primary text-primary w-5 h-5' />
@@ -95,7 +96,7 @@ const Moviedetails = () => {
               Buy Tickets
             </a>
             <a className="p-3 bg-gray-600 rounded-full cursor-pointer" onClick={handlefavorite}>
-              <Heart className={`w-5 h-5 ${favorites.some(movie => movie._id === id ) ? 'text-primary fill-primary' : ''}`}/>
+              <Heart className={`w-5 h-5 ${favorites.some(movie => movie._id === id) ? 'text-primary fill-primary' : ''}`} />
             </a>
           </div>
         </div>
@@ -107,7 +108,7 @@ const Moviedetails = () => {
           {movie.casts.slice(0, 12).map((cast, index) => (
             <div key={index} className="flex flex-col items-center text-center min-w-[80px]">
               <img
-                src={cast.primaryImage ? cast.primaryImage : 'no-cast.jpg' }
+                src={cast.primaryImage ? cast.primaryImage : 'no-cast.jpg'}
                 alt={cast.name}
                 className='rounded-full h-20 w-20 md:h-24 md:w-24 object-cover'
               />
@@ -127,9 +128,10 @@ const Moviedetails = () => {
           </button>
         </div>
         <div className=' flex flex-wrap max-sm: justify-center gap-8 mt-8'>
-          {shows.slice(0,4).map((show) => {
-            return <MovieCard key={show._id} movie={show} />
-          })}
+          {shows
+            ?.filter((s) => s && s._id).slice(0, 4).map((show) => {
+              return <MovieCard key={show._id} movie={show} />
+            })}
         </div>
         <div className='flex justify-center mt-10 max-md:mt-0'>
           <button onClick={() => { scrollTo(0, 0), navigate('/movies') }} className='px-10 py-3 text-md bg-primary hover:bg-primary-dull rounded-full transtion font-medium cursor-pointer max-md:px-5 max-md:text-sm my-5'>Show more</button>

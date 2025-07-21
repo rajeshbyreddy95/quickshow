@@ -16,8 +16,8 @@ import { useAppContext } from '../../context/Appcontext';
 const Dashboard = () => {
   const currency = import.meta.env.VITE_CURRENCY;
   const [dashboardData, setDashboardData] = useState({
-    totalBookings:0,
-    totalRevenue:0,
+    totalBookings: 0,
+    totalRevenue: 0,
     activeshows: [],
     totalUsers: 0
   });
@@ -99,30 +99,31 @@ const Dashboard = () => {
       </div>
       <p className='mt-10 text-xl font-semibold'>Active Shows</p>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mt-8 px-2 sm:px-5'>
-        {dashboardData.activeshows.length > 0 ? (dashboardData.activeshows.map((movie, index) => (
-          <div key={index} className='flex flex-col rounded-lg bg-primary/10 border-2 border-primary/20 overflow-hidden shadow-md hover:-translate-y-1 transition duration-300'>
-            <img
-              src={movie.movie.primaryImage}
-              alt="poster"
-              className='w-full h-64 object-cover'
-            />
-            <p className='pt-3 px-3 text-lg font-semibold text-white'>
-              {movie.movie.originalTitle.length > 25
-                ? movie.movie.originalTitle.slice(0, 25) + '...'
-                : movie.movie.originalTitle}
-            </p>
-            <div className='flex justify-between mt-2 px-3 text-white'>
-              <p className='text-lg font-medium'>{currency} {movie.showprice}</p>
-              <p className='flex items-center gap-1 text-gray-300 text-sm'>
-                <StarIcon className="w-4 h-4 text-primary fill-primary" />
-                {movie.movie.averageRating}
+        {dashboardData.activeshows.length > 0 ? (dashboardData.activeshows
+          .filter((movie) => movie?.movie?.primaryImage && movie?.movie?.originalTitle).map((movie, index) => (
+            <div key={index} className='flex flex-col rounded-lg bg-primary/10 border-2 border-primary/20 overflow-hidden shadow-md hover:-translate-y-1 transition duration-300'>
+              <img
+                src={movie.movie.primaryImage}
+                alt="poster"
+                className='w-full h-64 object-cover'
+              />
+              <p className='pt-3 px-3 text-lg font-semibold text-white'>
+                {movie.movie.originalTitle.length > 25
+                  ? movie.movie.originalTitle.slice(0, 25) + '...'
+                  : movie.movie.originalTitle}
+              </p>
+              <div className='flex justify-between mt-2 px-3 text-white'>
+                <p className='text-lg font-medium'>{currency} {movie.showprice}</p>
+                <p className='flex items-center gap-1 text-gray-300 text-sm'>
+                  <StarIcon className="w-4 h-4 text-primary fill-primary" />
+                  {movie.movie.averageRating}
+                </p>
+              </div>
+              <p className='px-3 py-3 text-sm text-gray-500'>
+                {formatDateTime(movie.showDateTime).replace('•', ' at')}
               </p>
             </div>
-            <p className='px-3 py-3 text-sm text-gray-500'>
-              {formatDateTime(movie.showDateTime).replace('•', ' at')}
-            </p>
-          </div>
-        ))) : (
+          ))) : (
           <p className='text-white'>No active shows found.</p>
         )}
       </div>
