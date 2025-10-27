@@ -9,7 +9,7 @@ export const getnowplayingMovies = async (req, res) => {
     const { data } = await axios.get('https://imdb236.p.rapidapi.com/api/imdb/most-popular-movies', {
       headers: {
         'x-rapidapi-host': "imdb236.p.rapidapi.com",
-        'x-rapidapi-key': `${process.env.X_RAPIAPI_KEY}`
+        'x-rapidapi-key': `${process.env.X_RAPIDAPI_KEY}`
       },
     })
     const movies = data;
@@ -115,4 +115,3 @@ export const getmovie = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 }
-

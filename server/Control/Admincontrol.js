@@ -12,6 +12,8 @@ export const adminDashboarddata = async(req,res) => {
       try {
           const bookings = await Booking.find({isPaid:true});
           const activeshows = await Show.find({showDateTime : {$gte : new Date()}}).populate('movie');
+          
+
           const totalUsers = await User.countDocuments();
           const dashboarddata = {
             totalUsers,

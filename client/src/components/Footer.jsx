@@ -33,8 +33,8 @@ const Footer = () => {
 
             <div className="flex flex-col gap-2 sm:text-sm max-md:text-xs py-4">
               <p className="font-semibold text-base sm:text-sm">Get in touch</p>
-              <p className="cursor-pointer hover:underline">+1-234-567-890</p>
-              <p className="cursor-pointer hover:underline">contact@example.com</p>
+              <p className="cursor-pointer hover:underline">+91 7075979652</p>
+              <p className="cursor-pointer hover:underline">rajeshbyreddy95@gmail.com</p>
             </div>
 
           </div>

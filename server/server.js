@@ -14,6 +14,7 @@ import { stripeWebhooks } from './Control/Stripewebhooks.js';
 const app = express();
 const port = 3000;
 await mongoConnect();
+console.log(process.env.MONGODB_URI);
 
 app.post('/api/stripe', express.raw({type : "application/json"}), stripeWebhooks);
 
