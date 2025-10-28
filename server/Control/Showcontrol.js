@@ -24,17 +24,19 @@ export const addshow = async (req, res) => {
   try {
     const { movieId, showsInput, showprice } = req.body;
     let movie = await Movie.findById(movieId);
-
+    console.log("movie is ",movie);
+    
     if (!movie) {
       const moviedataResponse = await axios.get(`https://imdb236.p.rapidapi.com/api/imdb/${movieId}`, {
         headers: {
           'x-rapidapi-host': "imdb236.p.rapidapi.com",
-          'x-rapidapi-key': `${process.env.X_RAPIAPI_KEY}`
+          'x-rapidapi-key': `${process.env.X_RAPIDAPI_KEY}`
         }
       })
 
       const moviedata = moviedataResponse.data;
-
+      console.log("movie data is ", moviedata.originalTitle);
+      
       const movieDetails = {
         _id: moviedata.id,
         originalTitle: moviedata.originalTitle,
@@ -50,6 +52,9 @@ export const addshow = async (req, res) => {
         runtime: moviedata.runtimeMinutes,
         numVotes: moviedata.numVotes
       };
+
+      console.log("details of movie is ", movieDetails);
+      
 
       movie = await Movie.create(movieDetails);
     }

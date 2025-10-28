@@ -11,8 +11,9 @@ import adminRouter from './Routes/adminrouter.js';
 import userRouter from './Routes/userrouter.js';
 import { stripeWebhooks } from './Control/Stripewebhooks.js';
 
+
 const app = express();
-const port = 3000;
+const port = 3001;
 await mongoConnect();
 console.log(process.env.MONGODB_URI);
 

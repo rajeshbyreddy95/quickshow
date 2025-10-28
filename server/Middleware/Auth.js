@@ -3,7 +3,8 @@ import { clerkClient } from "@clerk/express";
 export const protectAdmin = async (req, res, next) => {
   try {
     const { userId } = req.auth(); // ✅ correct modern usage
-
+    console.log(userId);
+    
     if (!userId) {
       return res.status(401).json({ success: false, message: "Not Logged In" });
     }
