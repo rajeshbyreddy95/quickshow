@@ -8,6 +8,7 @@ import {useAuth, useUser} from '@clerk/clerk-react'
 import { useEffect } from "react";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+console.log(import.meta.env.VITE_BASE_URL);
 
 const AppContext = createContext();
 
